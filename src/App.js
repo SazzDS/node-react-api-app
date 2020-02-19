@@ -1,26 +1,50 @@
-import React from 'react';
+import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  state = {
+    users: [], 
+    user: {
+      email_id: ''
+    }
+  }
+
+  componentDidMount() {
+    this.getUsers();
+  }
+
+  getUsers = () => {
+    fetch('http://localhost:4000/getList')
+    .then(response => response.json())
+    .then(response => this.setState({users: response.data}))
+    .catch(err => console.log(err))
+  }
+
+  addUsers = () => {
+    const { user } = this.state;
+    fetch(`http://localhost:4000/addNew?email_id=${user.email_id}`)
+    .then(this.getUsers)
+    .catch(err => console.log(err))
+  }
+
+  renderUsers = ({sl_user, email_id}) => {
+    return <div key={sl_user}>{email_id}</div>
+  }
+
+  render() {
+    const { users, user } = this.state;
+    return (
+      <div className="App">
+        {users.map(this.renderUsers)}
+        <div>
+          <input value={user.email_id}
+          onChange={e => this.setState({ user: { ...user, email_id: e.target.value } })} />
+          <button type="button" onClick={this.addUsers}>Add Data</button>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default App;
